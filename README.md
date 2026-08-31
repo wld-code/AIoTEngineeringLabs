@@ -50,17 +50,17 @@ Each row links to that lab's own `README.md`, the full self-contained procedure 
 | 3 | Chapter 3: Connectivity | Measure the real network cost of a telemetry message under MQTT and HTTP, with and without TLS, from packet captures. | [ch03-mqtt-vs-http-cost/](./ch03-mqtt-vs-http-cost/README.md) |
 | 4 | Chapter 4: Securing IoT and Edge AI Systems | Build a two-level PKI from scratch, issue per-device certificates, and break mutual TLS and per-device authorization on purpose. | [ch04-pki-security/](./ch04-pki-security/README.md) |
 | 5 | Chapter 5: Edge Computing and Digital Twins | Close the loop between a platform's desired state and a device's reported state through a Device Twin. | [ch05-edge-device-twin/](./ch05-edge-device-twin/README.md) |
-| 6 | Chapter 6: Data Intensive AIoT Platforms | Stream a real Nano 33 BLE Sense over USB serial through Node-RED into TimescaleDB, with a live dashboard. | [ch06-imu-streaming/](./ch06-imu-streaming/README.md) |
-| 7 | Chapter 7: EDA and Dataset Preparation | EDA on raw environmental telemetry, then a stratified train/val/test split. | [ch07-eda-dataset-prep/](./ch07-eda-dataset-prep/README.md) |
-| 8 | Chapter 8: Signal Processing and Feature Engineering | Turn raw motor vibration into FFT and Butterworth spectral features a model can score. | [ch08-fft-vibration/](./ch08-fft-vibration/README.md) |
-| 9 | Chapter 9: Supervised Learning | Train a yes/no/idle gesture classifier on the Nano 33 BLE Sense, exported as a 7 KB int8 `.tflite`. | [ch09-gesture-classifier/](./ch09-gesture-classifier/README.md) |
-| 10 | Chapter 10: Anomaly Detection | Catch a bearing fault on vibration features at a sub-5% false-alarm rate. | [ch10-isolation-forest/](./ch10-isolation-forest/README.md) |
-| 11 | Chapter 11: Model Deployment | Deploy the Chapter 9 gesture model to ESP32-S3 and Nano 33, measuring accuracy delta and p99 latency. | [ch11-tflm-deployment/](./ch11-tflm-deployment/README.md) |
-| 12 | Chapter 12: TinyML Frameworks | Benchmark the same model across three runtimes, TFLite Micro, ESP-NN, CMSIS-NN, and two boards. | [ch12-runtime-benchmark/](./ch12-runtime-benchmark/README.md) |
-| 13 | Chapter 13: Model Compression | Shrink the gesture model with quantization and pruning, then distil a 4 KB student that beats it. | [ch13-model-compression/](./ch13-model-compression/README.md) |
-| 14 | Chapter 14: Embedded Vision | Measure camera capture and inference, deploy a compact classifier or detector, publish over BLE. | [ch14-fomo-presence/](./ch14-fomo-presence/README.md) |
-| 15 | Chapter 15: Tiny Transformers | A wake word detected entirely on a Nano 33 BLE Sense triggers a local LLM to generate a question, over serial, through Node-RED. | [ch15-micro-transformer-kws/](./ch15-micro-transformer-kws/README.md) |
-| 16 | Chapter 16: Industrial AIoT and MLOps (capstone) | Three PLC-bridged production lines, anomaly scorers hot-swapped by signed OTA, drift-triggered retraining. | [ch16-industrial-mlops-capstone/](./ch16-industrial-mlops-capstone/README.md) |
+| 6 | Chapter 6: Data Intensive AIoT Platforms | Stream a real Nano 33 BLE Sense over USB serial through Node-RED into TimescaleDB, with a live dashboard. | to do |
+| 7 | Chapter 7: EDA and Dataset Preparation | EDA on raw environmental telemetry, then a stratified train/val/test split. | | to do |
+| 8 | Chapter 8: Signal Processing and Feature Engineering | Turn raw motor vibration into FFT and Butterworth spectral features a model can score. | to do |
+| 9 | Chapter 9: Supervised Learning | Train a yes/no/idle gesture classifier on the Nano 33 BLE Sense, exported as a 7 KB int8 `.tflite`.| to do |
+| 10 | Chapter 10: Anomaly Detection | Catch a bearing fault on vibration features at a sub-5% false-alarm rate. | to do |
+| 11 | Chapter 11: Model Deployment | Deploy the Chapter 9 gesture model to ESP32-S3 and Nano 33, measuring accuracy delta and p99 latency. | to do |
+| 12 | Chapter 12: TinyML Frameworks | Benchmark the same model across three runtimes, TFLite Micro, ESP-NN, CMSIS-NN, and two boards. | to do |
+| 13 | Chapter 13: Model Compression | Shrink the gesture model with quantization and pruning, then distil a 4 KB student that beats it. | to do |
+| 14 | Chapter 14: Embedded Vision | Measure camera capture and inference, deploy a compact classifier or detector, publish over BLE. | to do |
+| 15 | Chapter 15: Tiny Transformers | A wake word detected entirely on a Nano 33 BLE Sense triggers a local LLM to generate a question, over serial, through Node-RED. | to do |
+| 16 | Chapter 16: Industrial AIoT and MLOps (capstone) | Three PLC-bridged production lines, anomaly scorers hot-swapped by signed OTA, drift-triggered retraining. | to do |
 
 ## Conventions
 
