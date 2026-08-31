@@ -1,0 +1,173 @@
+[
+    {
+        "id": "tab-factory",
+        "type": "tab",
+        "label": "Factory Telemetry",
+        "disabled": false,
+        "info": "Lab 1 — IoT platform on a laptop. Subscribes to factory/+/+/temperature, writes live state to Redis (SET device:<line>/<dev>), raises alarms above 80 C by republishing to factory/<line>/<dev>/alarms AND pushing onto a bounded Redis 'alarms' list. Node-RED never talks to the dashboard directly — Redis is the shared state layer."
+    },
+    {
+        "id": "broker-local",
+        "type": "mqtt-broker",
+        "name": "Local Mosquitto",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": ""
+    },
+    {
+        "id": "redis-local",
+        "type": "redis-config",
+        "name": "Local Redis",
+        "options": "{\"host\":\"redis\",\"port\":6379}",
+        "cluster": false,
+        "optionsType": "json"
+    },
+    {
+        "id": "mqtt-in-temp",
+        "type": "mqtt in",
+        "z": "tab-factory",
+        "name": "factory/+/+/temperature",
+        "topic": "factory/+/+/temperature",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "broker-local",
+        "x": 230,
+        "y": 200,
+        "wires": [["fn-route"]]
+    },
+    {
+        "id": "fn-route",
+        "type": "function",
+        "z": "tab-factory",
+        "name": "parse · threshold · route",
+        "func": "// Incoming: msg.topic = factory/<line>/<device>/temperature\n//           msg.payload = { ts, value, unit }\n//\n// Outputs:\n//   1 -> Redis  : SET device:<line>/<device> = JSON live state\n//   2 -> MQTT   : factory/<line>/<device>/alarms  (only on threshold breach)\n//   3 -> Redis  : LPUSH alarms <json>             (only on threshold breach)\nconst THRESHOLD_C = 80;\n\nconst parts = (msg.topic || '').split('/');\nconst line = parts[1] || 'unknown-line';\nconst device = parts[2] || 'unknown-device';\n\nconst p = msg.payload || {};\nconst v = (typeof p.value === 'number') ? p.value : Number(p.value);\nif (!isFinite(v)) { return [null, null, null]; }\n\nconst key = line + '/' + device;\nconst ts = p.ts || Date.now();\n\n// Output 1 — live operational state. Latest reading per device, nothing else.\nconst stateMsg = {\n    topic: 'device:' + key,\n    payload: JSON.stringify({ line, device, value: v, unit: p.unit || 'C', ts })\n};\n\nif (v > THRESHOLD_C) {\n    const alarm = { line, device, value: v, ts, level: 'high', threshold: THRESHOLD_C };\n    const mqttMsg = {\n        topic: 'factory/' + line + '/' + device + '/alarms',\n        payload: alarm\n    };\n    const redisAlarmMsg = { topic: 'alarms', payload: JSON.stringify(alarm) };\n    return [stateMsg, mqttMsg, redisAlarmMsg];\n}\nreturn [stateMsg, null, null];",
+        "outputs": 3,
+        "noerr": 0,
+        "x": 470,
+        "y": 200,
+        "wires": [
+            ["redis-set"],
+            ["mqtt-out-alarms", "debug-alarm"],
+            ["redis-lpush"]
+        ]
+    },
+    {
+        "id": "redis-set",
+        "type": "redis-command",
+        "z": "tab-factory",
+        "server": "redis-local",
+        "command": "set",
+        "name": "SET device:* (live state)",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 800,
+        "y": 160,
+        "wires": [[]]
+    },
+    {
+        "id": "mqtt-out-alarms",
+        "type": "mqtt out",
+        "z": "tab-factory",
+        "name": "publish alarms",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "broker": "broker-local",
+        "x": 810,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "debug-alarm",
+        "type": "debug",
+        "z": "tab-factory",
+        "name": "alarm",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 800,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "redis-lpush",
+        "type": "redis-command",
+        "z": "tab-factory",
+        "server": "redis-local",
+        "command": "lpush",
+        "name": "LPUSH alarms",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 770,
+        "y": 360,
+        "wires": [["chg-ltrim-args"]]
+    },
+    {
+        "id": "chg-ltrim-args",
+        "type": "change",
+        "z": "tab-factory",
+        "name": "ltrim args 0..199",
+        "rules": [
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "alarms",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "[0,199]",
+                "tot": "json"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 970,
+        "y": 360,
+        "wires": [["redis-ltrim"]]
+    },
+    {
+        "id": "redis-ltrim",
+        "type": "redis-command",
+        "z": "tab-factory",
+        "server": "redis-local",
+        "command": "ltrim",
+        "name": "LTRIM alarms 0 199",
+        "topic": "",
+        "params": "[]",
+        "paramsType": "json",
+        "payloadType": "json",
+        "block": false,
+        "x": 1180,
+        "y": 360,
+        "wires": [[]]
+    }
+]

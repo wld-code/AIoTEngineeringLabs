@@ -1,0 +1,12 @@
+# Cert material — generated locally by certs/gen-certs.sh, never committed
+certs/*.key
+certs/*.crt
+certs/*.csr
+certs/*.srl
+
+# Packet captures and result files — lab output, not source. docs/*.json
+# is the exception: a curated, saved snapshot of one real run, checked in
+# as evidence for the book's figures and numbers.
+captures/*.pcap
+results/*.csv
+results/*.json

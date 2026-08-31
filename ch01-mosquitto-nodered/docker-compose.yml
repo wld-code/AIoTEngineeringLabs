@@ -1,0 +1,71 @@
+# Lab 1 — IoT platform on a laptop.
+# Simulated devices → Mosquitto (cloud gateway) → Node-RED (stream processing
+# & rules) → Redis (hot storage) → Streamlit (dashboard).
+#
+# The dashboard never talks to the broker. Redis is the shared state layer
+# between producers (Node-RED) and consumers (Streamlit). That decoupling is
+# the architectural point of Chapter 1.
+#
+# No explicit container_name below on purpose — several labs in this book
+# reuse generic service names (mosquitto, redis, streamlit), and a hardcoded
+# container_name collides across labs if you run more than one without a
+# full teardown in between. Compose's default project-prefixed naming
+# avoids that; internal service-to-service DNS (MQTT_HOST=mosquitto etc.)
+# resolves by service name regardless, so nothing else changes.
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"   # MQTT
+      - "9001:9001"   # MQTT over WebSockets
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - iot
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"   # hot storage — ephemeral live state, no persistence
+    networks:
+      - iot
+
+  nodered:
+    build:
+      context: ./nodered
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./nodered/data:/data
+    environment:
+      - TZ=Europe/Paris
+      - NODE_RED_ENABLE_PROJECTS=false
+    depends_on:
+      - mosquitto
+      - redis
+    networks:
+      - iot
+
+  streamlit:
+    build: ./streamlit
+    restart: unless-stopped
+    ports:
+      - "8501:8501"   # Streamlit dashboard
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+    depends_on:
+      - redis
+    networks:
+      - iot
+
+networks:
+  iot:
+    driver: bridge

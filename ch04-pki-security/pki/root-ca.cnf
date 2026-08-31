@@ -1,0 +1,66 @@
+## Root CA — OpenSSL CA configuration
+## Points at $ENV::ROOT_CA_DIR so 01-init-root-ca.sh can run this file from
+## anywhere without editing paths by hand.
+
+[ca]
+default_ca = CA_default
+
+[CA_default]
+dir               = $ENV::ROOT_CA_DIR
+certs             = $dir/certs
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+private_key       = $dir/private/ca.key.pem
+certificate       = $dir/certs/ca.cert.pem
+crlnumber         = $dir/crlnumber
+crl               = $dir/crl/ca.crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 30
+default_md        = sha256
+default_days      = 7300
+preserve          = no
+policy            = policy_strict
+copy_extensions   = none
+
+[policy_strict]
+countryName             = optional
+stateOrProvinceName     = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[req]
+default_bits        = 4096
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+x509_extensions     = v3_root_ca
+
+[req_distinguished_name]
+countryName             = Country Name (2 letter code)
+organizationName        = Organization Name
+commonName              = Common Name
+commonName_max          = 64
+
+# Self-signed root certificate. CA:true with no pathlen — this is the top of
+# the tree, it is allowed to sign an unlimited depth of subordinate CAs (we
+# only ever create one: the intermediate).
+[v3_root_ca]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints       = critical, CA:true
+keyUsage                = critical, digitalSignature, cRLSign, keyCertSign
+
+# Signs the intermediate CA's certificate. pathlen:0 is the constraint that
+# stops the intermediate from creating another CA beneath itself — it may
+# only sign leaf (device/server) certificates.
+[v3_intermediate_ca]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints       = critical, CA:true, pathlen:0
+keyUsage                = critical, digitalSignature, cRLSign, keyCertSign
+
+[crl_ext]
+authorityKeyIdentifier = keyid:always

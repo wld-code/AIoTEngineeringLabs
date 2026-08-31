@@ -1,0 +1,88 @@
+# Lab 5 — Device Twin: a small web UI changes a simulated device's
+# telemetry reporting interval through a desired/reported synchronization
+# loop. Mosquitto (broker) <-> device-simulator (the "device") and
+# Node-RED (the edge gateway, moving-average + alarm) <-> twin-api
+# (FastAPI, the twin's REST surface + MQTT bridge) <-> Redis (latest state
+# only, no history).
+#
+# No explicit container_name below on purpose — other labs in this book use
+# the same generic service names; Compose's default project-prefixed naming
+# avoids collisions across labs that happen to be up at the same time.
+services:
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mosquitto_pub -h localhost -t healthcheck -m ping -q 0 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  node-red:
+    image: nodered/node-red:3.1
+    restart: unless-stopped
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./node-red/flows.json:/data/flows.json
+      - ./node-red/settings.js:/data/settings.js:ro
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+    healthcheck:
+      # 127.0.0.1, not localhost: this image's container resolves
+      # "localhost" to ::1 first, but Node-RED's uiHost only binds IPv4 by
+      # default, so a hostname-based check here fails even when the server
+      # is completely healthy.
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:1880/ || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  twin-api:
+    build: ./twin-api
+    restart: unless-stopped
+    environment:
+      MQTT_HOST: mosquitto
+      REDIS_HOST: redis
+    ports:
+      - "8000:8000"
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      # 127.0.0.1, not localhost — see the node-red healthcheck's comment
+      # above; harmless here (this one already resolved to IPv4 first) but
+      # not worth leaving as a landmine for the next edit.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  device-simulator:
+    build: ./device-simulator
+    restart: unless-stopped
+    environment:
+      MQTT_HOST: mosquitto
+    depends_on:
+      mosquitto:
+        condition: service_healthy

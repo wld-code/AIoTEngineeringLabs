@@ -1,0 +1,9 @@
+# Build output
+.pio/
+build/
+superloop/sdkconfig
+superloop/sdkconfig.*
+!superloop/sdkconfig.defaults
+freertos/sdkconfig
+freertos/sdkconfig.*
+!freertos/sdkconfig.defaults

@@ -1,0 +1,93 @@
+{
+  "metadata": {
+    "date": "2026-08-17T18:29:50.626805+00:00",
+    "os": "macOS-15.6-arm64-arm-64bit",
+    "docker_version": "Docker version 29.4.0, build 9d7ad9f",
+    "mqtt_version": "3.1.1",
+    "http_version": "HTTP/1.1",
+    "payload_bytes": 34,
+    "tls": false
+  },
+  "results": [
+    {
+      "test": "A",
+      "protocol": "MQTT",
+      "connection": "new",
+      "file": "/captures/testA.pcap",
+      "message_count": 1,
+      "payload_bytes": 34,
+      "total_packets": 14,
+      "total_network_bytes": 835,
+      "avg_network_bytes_per_message": 835.0,
+      "payload_efficiency_pct": 4.07,
+      "tcp_flow_count": 1,
+      "breakdown": {
+        "tcp_establishment": 172,
+        "protocol_setup": 132,
+        "telemetry_exchange": 269,
+        "tcp_termination": 262,
+        "unclassified": 0
+      }
+    },
+    {
+      "test": "B",
+      "protocol": "MQTT",
+      "connection": "persistent",
+      "file": "/captures/testB.pcap",
+      "message_count": 10,
+      "payload_bytes": 34,
+      "total_packets": 32,
+      "total_network_bytes": 2325,
+      "avg_network_bytes_per_message": 232.5,
+      "payload_efficiency_pct": 14.62,
+      "tcp_flow_count": 1,
+      "breakdown": {
+        "tcp_establishment": 172,
+        "protocol_setup": 137,
+        "telemetry_exchange": 1754,
+        "tcp_termination": 262,
+        "unclassified": 0
+      }
+    },
+    {
+      "test": "C",
+      "protocol": "HTTP",
+      "connection": "new",
+      "file": "/captures/testC.pcap",
+      "message_count": 1,
+      "payload_bytes": 34,
+      "total_packets": 12,
+      "total_network_bytes": 870,
+      "avg_network_bytes_per_message": 870.0,
+      "payload_efficiency_pct": 3.91,
+      "tcp_flow_count": 1,
+      "breakdown": {
+        "tcp_establishment": 172,
+        "protocol_setup": 0,
+        "telemetry_exchange": 490,
+        "tcp_termination": 208,
+        "unclassified": 0
+      }
+    },
+    {
+      "test": "D",
+      "protocol": "HTTP",
+      "connection": "persistent",
+      "file": "/captures/testD.pcap",
+      "message_count": 10,
+      "payload_bytes": 34,
+      "total_packets": 57,
+      "total_network_bytes": 5090,
+      "avg_network_bytes_per_message": 509.0,
+      "payload_efficiency_pct": 6.68,
+      "tcp_flow_count": 1,
+      "breakdown": {
+        "tcp_establishment": 172,
+        "protocol_setup": 0,
+        "telemetry_exchange": 4710,
+        "tcp_termination": 208,
+        "unclassified": 0
+      }
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+[
+    {
+        "id": "twin-lab-tab",
+        "type": "tab",
+        "label": "Device Twin - edge flow",
+        "disabled": false,
+        "info": "Lab 5 — the edge gateway's local processing. Subscribes to raw telemetry from the simulated device, validates it, keeps a 5-sample moving average in flow context, and republishes the processed reading. Runs entirely on this Node-RED instance — nothing here depends on the Device Twin API being reachable."
+    },
+    {
+        "id": "mqtt-broker-twin",
+        "type": "mqtt-broker",
+        "name": "edge mosquitto",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "node-red-twin-lab",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "30",
+        "cleansession": true
+    },
+    {
+        "id": "in-raw-telemetry",
+        "type": "mqtt in",
+        "z": "twin-lab-tab",
+        "name": "Raw Telemetry",
+        "topic": "devices/sim-001/telemetry/raw",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "mqtt-broker-twin",
+        "x": 160,
+        "y": 140,
+        "wires": [
+            [
+                "fn-parse-validate"
+            ]
+        ]
+    },
+    {
+        "id": "fn-parse-validate",
+        "type": "function",
+        "z": "twin-lab-tab",
+        "name": "Parse and Validate",
+        "func": "// mqtt-in already parsed the JSON payload (datatype \"json\" on the node\n// above) — this node's job is structural validation only: drop anything\n// that doesn't have the shape the rest of the flow assumes, so a bad\n// message never reaches the moving-average state.\nconst p = msg.payload;\n\nif (!p || typeof p !== 'object') {\n    node.warn('dropped: payload is not an object');\n    return null;\n}\nif (typeof p.device_id !== 'string') {\n    node.warn('dropped: missing/invalid device_id');\n    return null;\n}\nif (typeof p.temperature_c !== 'number' || Number.isNaN(p.temperature_c)) {\n    node.warn('dropped: missing/invalid temperature_c');\n    return null;\n}\nif (typeof p.reporting_interval_s !== 'number') {\n    node.warn('dropped: missing/invalid reporting_interval_s');\n    return null;\n}\nif (typeof p.timestamp !== 'string') {\n    node.warn('dropped: missing/invalid timestamp');\n    return null;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 140,
+        "wires": [
+            [
+                "fn-moving-average"
+            ]
+        ]
+    },
+    {
+        "id": "fn-moving-average",
+        "type": "function",
+        "z": "twin-lab-tab",
+        "name": "Moving Average",
+        "func": "// Keeps the latest 5 temperature readings in flow context (survives\n// across messages, resets on a Node-RED restart/deploy — that's the\n// point: this is edge state, not a database). average_temperature_c is\n// then what \"the last five samples look like\", not just this one sample.\nconst p = msg.payload;\n\nlet history = flow.get('temp_history') || [];\nhistory.push(p.temperature_c);\nif (history.length > 5) {\n    history = history.slice(-5);\n}\nflow.set('temp_history', history);\n\nconst sum = history.reduce((a, b) => a + b, 0);\nconst average_temperature_c = Math.round((sum / history.length) * 100) / 100;\n\nmsg.payload = {\n    device_id: p.device_id,\n    timestamp: p.timestamp,\n    temperature_c: p.temperature_c,\n    average_temperature_c: average_temperature_c,\n    reporting_interval_s: p.reporting_interval_s,\n    alarm: average_temperature_c > 26\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 630,
+        "y": 140,
+        "wires": [
+            [
+                "out-processed-telemetry",
+                "debug-processed"
+            ]
+        ]
+    },
+    {
+        "id": "out-processed-telemetry",
+        "type": "mqtt out",
+        "z": "twin-lab-tab",
+        "name": "Publish Processed Telemetry",
+        "topic": "devices/sim-001/telemetry/processed",
+        "qos": "0",
+        "retain": "false",
+        "broker": "mqtt-broker-twin",
+        "x": 900,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "debug-processed",
+        "type": "debug",
+        "z": "twin-lab-tab",
+        "name": "Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 880,
+        "y": 180,
+        "wires": []
+    }
+]

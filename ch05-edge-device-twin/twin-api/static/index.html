@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Device Twin - sim-001</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>Device Twin</h1>
+  <div class="device-line">
+    <span class="device-id">sim-001</span>
+    <span id="conn-status" class="badge badge-unknown">connecting...</span>
+  </div>
+</header>
+
+<main>
+  <section class="card">
+    <h2>Telemetry</h2>
+    <dl>
+      <dt>Latest temperature</dt><dd id="temp">-</dd>
+      <dt>Moving average</dt><dd id="avg-temp">-</dd>
+      <dt>Alarm</dt><dd id="alarm">-</dd>
+      <dt>Last update</dt><dd id="last-update">-</dd>
+      <dt>Staleness</dt><dd id="staleness">-</dd>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>Twin synchronization</h2>
+    <dl>
+      <dt>Reported interval</dt><dd id="reported-interval">-</dd>
+      <dt>Desired interval</dt><dd id="desired-interval">-</dd>
+      <dt>Command status</dt><dd id="command-status">-</dd>
+      <dt>Synchronized</dt><dd id="synchronized">-</dd>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>Change reporting interval</h2>
+    <form id="apply-form">
+      <label for="interval-input">reporting_interval_s</label>
+      <input id="interval-input" type="number" min="0.1" step="0.1" value="1" required>
+      <button type="submit">Apply</button>
+    </form>
+    <div class="quick-buttons">
+      <button type="button" class="quick" data-value="1">1 s</button>
+      <button type="button" class="quick" data-value="2">2 s</button>
+      <button type="button" class="quick" data-value="5">5 s</button>
+    </div>
+    <p id="submit-feedback" class="feedback"></p>
+  </section>
+
+  <section class="card">
+    <h2>Telemetry arrivals</h2>
+    <p class="hint">Each line is a new reading reaching the twin - watch the gap between lines change after you apply a new interval.</p>
+    <ul id="arrivals"></ul>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+## Intermediate CA — OpenSSL CA configuration
+## Points at $ENV::INT_CA_DIR. This is the CA that does the day-to-day
+## signing (device certs, server certs, and the CRL). The root never
+## touches a device certificate directly.
+
+[ca]
+default_ca = CA_default
+
+[CA_default]
+dir               = $ENV::INT_CA_DIR
+certs             = $dir/certs
+new_certs_dir     = $dir/newcerts
+database          = $dir/index.txt
+serial            = $dir/serial
+private_key       = $dir/private/intermediate.key.pem
+certificate       = $dir/certs/intermediate.cert.pem
+crlnumber         = $dir/crlnumber
+crl               = $dir/crl/intermediate.crl.pem
+crl_extensions    = crl_ext
+default_crl_days  = 7
+default_md        = sha256
+default_days      = 825
+preserve          = no
+policy            = policy_loose
+copy_extensions   = none
+
+[policy_loose]
+countryName             = optional
+stateOrProvinceName     = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = supplied
+emailAddress            = optional
+
+[req]
+default_bits        = 3072
+distinguished_name  = req_distinguished_name
+string_mask         = utf8only
+default_md          = sha256
+
+[req_distinguished_name]
+countryName             = Country Name (2 letter code)
+organizationName        = Organization Name
+commonName              = Common Name
+commonName_max          = 64
+
+[crl_ext]
+authorityKeyIdentifier = keyid:always

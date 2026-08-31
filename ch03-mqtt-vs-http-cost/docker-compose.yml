@@ -1,0 +1,48 @@
+# Lab 3 — Measuring Protocol and Connection Overhead.
+# Mosquitto (MQTT) and a minimal stdlib HTTP server, plus a client
+# container that both generates the test traffic and captures it on its
+# own network interface — no host loopback interface, no interface-name
+# guessing, works the same under Docker Engine (Linux) and Docker Desktop
+# (macOS).
+#
+# No explicit container_name on purpose — see labs/ch01-mosquitto-nodered's
+# docker-compose.yml for why: it lets more than one lab's stack run at once
+# without a hardcoded name collision.
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2
+    restart: unless-stopped
+    ports:
+      - "1883:1883"     # published for the optional manual/Wireshark path — see README
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+    networks:
+      - lab
+
+  http_server:
+    build: ./http_server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"     # published for the optional manual/Wireshark path — see README
+    networks:
+      - lab
+
+  client:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    depends_on:
+      - mosquitto
+      - http_server
+    cap_add:
+      - NET_RAW      # tcpdump needs this to open a capture socket
+      - NET_ADMIN    # and this to put the interface in the mode tcpdump wants
+    volumes:
+      - ./captures:/captures
+      - ./results:/results
+    networks:
+      - lab
+
+networks:
+  lab:
+    driver: bridge

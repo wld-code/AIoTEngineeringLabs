@@ -1,0 +1,10 @@
+# PKI material — generated locally by pki/0*.sh, never committed.
+pki/root-ca/
+pki/intermediate-ca/
+pki/rogue/
+pki/*.key.pem
+pki/*.cert.pem
+certs/*.pem
+
+# Packet captures — lab output, not source.
+*.pcap

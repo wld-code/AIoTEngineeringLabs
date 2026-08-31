@@ -1,0 +1,19 @@
+services:
+  mosquitto:
+    # Pinned to the exact version tested for this lab (2.1.2), not the
+    # floating "2" tag, so behavior stays reproducible across installs.
+    image: eclipse-mosquitto:2.1.2-alpine
+    container_name: lab04-mosquitto
+    ports:
+      - "8883:8883"   # MQTT over TLS with mandatory client cert + CRL check
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mosquitto/config/acl.conf:/mosquitto/config/acl.conf:ro
+      - ./certs:/mosquitto/certs:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    restart: unless-stopped
+
+volumes:
+  mosquitto-data:
+  mosquitto-log:

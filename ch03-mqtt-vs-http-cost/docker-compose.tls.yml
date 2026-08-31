@@ -1,0 +1,14 @@
+# Optional TLS extension — layer on top of the base stack:
+#   docker compose -f docker-compose.yml -f docker-compose.tls.yml up -d --build
+#
+# Run certs/gen-certs.sh first (see README). Adds Mosquitto's TLS listener
+# on 8883, without touching the base docker-compose.yml or its plaintext
+# listener on 1883. The TLS extension compares MQTT only (see the README
+# for why) — no HTTPS server is added here.
+services:
+  mosquitto:
+    ports:
+      - "8883:8883"     # published for the optional manual/Wireshark path — see README
+    volumes:
+      - ./mosquitto/config-tls:/mosquitto/config:ro
+      - ./certs:/mosquitto/certs:ro

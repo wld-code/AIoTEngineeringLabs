@@ -1,0 +1,39 @@
+{
+  "metadata": {
+    "date": "2026-08-17T18:29:57.352614+00:00",
+    "os": "macOS-15.6-arm64-arm-64bit",
+    "docker_version": "Docker version 29.4.0, build 9d7ad9f",
+    "mqtt_version": "3.1.1",
+    "http_version": "HTTP/1.1",
+    "payload_bytes": 34,
+    "tls": true
+  },
+  "results": [
+    {
+      "test": "A",
+      "protocol": "MQTT",
+      "connection": "new",
+      "file": "/captures/testA_tls.pcap",
+      "message_count": 1,
+      "payload_bytes": 34,
+      "total_packets": 19,
+      "total_network_bytes": 7490,
+      "avg_network_bytes_per_message": 7490.0,
+      "payload_efficiency_pct": 0.45,
+      "tcp_flow_count": 1
+    },
+    {
+      "test": "B",
+      "protocol": "MQTT",
+      "connection": "persistent",
+      "file": "/captures/testB_tls.pcap",
+      "message_count": 10,
+      "payload_bytes": 34,
+      "total_packets": 40,
+      "total_network_bytes": 9334,
+      "avg_network_bytes_per_message": 933.4,
+      "payload_efficiency_pct": 3.64,
+      "tcp_flow_count": 1
+    }
+  ]
+}

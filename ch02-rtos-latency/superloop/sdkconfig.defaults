@@ -1,0 +1,15 @@
+# Lab 2 polling super-loop — defaults for the Seeed Studio XIAO ESP32-S3.
+CONFIG_IDF_TARGET="esp32s3"
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG_ENABLED=y
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+
+# Single core + run-time stats so the idle-percentage metric is unambiguous.
+CONFIG_FREERTOS_UNICORE=y
+CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
+CONFIG_FREERTOS_RUN_TIME_STATS_USING_ESP_TIMER=y
+
+# The busy loop deliberately starves the idle task (that is the whole point).
+# Disable the idle-task watchdog so its warnings don't drown out the REPORT
+# line — the 0 % idle in the report already tells that story.
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU0=n
