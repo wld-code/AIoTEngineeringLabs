@@ -1,0 +1,73 @@
+# Lab 6 — 100 Hz IMU streaming through Redpanda into TimescaleDB.
+# Arduino Nano 33 BLE Sense (USB serial) → Node-RED, on the host, producing
+# onto two Redpanda topics (imu.raw, imu.alerts) → two independent Node-RED
+# consumers, one per topic → TimescaleDB (two hypertables) → Node-RED
+# Dashboard, fed both by DB queries (the raw chart) and directly by the
+# alerts consumer (the live alerts feed, no DB round trip in that path).
+#
+# Node-RED runs on the host, not in this compose file, because it needs
+# direct access to the board's USB serial port. Docker Desktop and OrbStack
+# on macOS do not pass host serial devices through to Linux containers, and
+# on Linux the extra indirection buys nothing a lab needs. See the README's
+# "Why Node-RED runs on the host" note. Because Node-RED is a host process
+# for both the producer and the two consumers, Redpanda only needs one
+# listener, advertised at localhost, not the container's internal DNS name.
+#
+# Host port 5433, not the default 5432: this lab machine already has another
+# project's Postgres bound to 5432. Host port 9092 for Redpanda's Kafka API
+# is the protocol's own default and was free on this machine; change both
+# this file and the Node-RED flow's kafka-broker config node together if
+# yours is already taken.
+services:
+
+  redpanda:
+    image: redpandadata/redpanda:v24.2.4
+    container_name: redpanda
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --node-id=0
+      - --smp=1
+      - --memory=768M
+      - --reserve-memory=0M
+      - --overprovisioned
+      - --check=false
+      # One listener, advertised as localhost: every client in this lab
+      # (Node-RED's producer, both Node-RED consumers, and every `rpk`
+      # command you run by hand) is a host process, not another container,
+      # so there is no second, in-network hostname anything needs to reach
+      # this broker by.
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://localhost:9092
+      - --rpc-addr=0.0.0.0:33145
+      - --advertise-rpc-addr=localhost:33145
+    ports:
+      - "9092:9092"   # Kafka API — the producer and consumer nodes, and rpk, all speak this
+      - "9644:9644"   # Admin API — rpk's default target, and `curl localhost:9644/v1/status/ready`
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  timescaledb:
+    image: timescale/timescaledb:2.15.0-pg16
+    container_name: timescaledb
+    restart: unless-stopped
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: aiot
+      POSTGRES_PASSWORD: aiot-imu-dev
+      POSTGRES_DB: aiot
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+      - ./timescaledb/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./timescaledb:/sql:ro
+
+volumes:
+  timescale_data:
+  redpanda_data:

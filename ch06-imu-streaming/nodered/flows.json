@@ -1,0 +1,928 @@
+[
+    {
+        "id": "tab6310001",
+        "type": "tab",
+        "label": "1 - Ingest & produce",
+        "disabled": false,
+        "info": "Nano 33 BLE Sense (USB serial) -> Node-RED parses each line, runs a rolling-window vibration check, and produces onto two Redpanda topics:\n  imu.raw    - every sample\n  imu.alerts - only samples the vibration check flagged\n\nEdit the serial-port config node's port to match `ls /dev/tty.*` (macOS/Linux) or your COM port (Windows) before deploying. This tab also carries the two DB-polling widgets on the Live dashboard page (the ax/ay/az chart and row count), which read imu_samples back the same way a real dashboard would - by querying the database, not by tapping the serial line directly."
+    },
+    {
+        "id": "tab6320002",
+        "type": "tab",
+        "label": "2 - Consume imu.raw -> TimescaleDB",
+        "disabled": false,
+        "info": "An independent consumer, its own consumer group (`ts-writer`), reads topic imu.raw and writes every sample into the imu_samples hypertable. It knows nothing about tab 1's producer or tab 3's alert consumer - stop this flow, the producer and the alerts path keep running, Redpanda holds every message this consumer has not yet read."
+    },
+    {
+        "id": "tab6320003",
+        "type": "tab",
+        "label": "3 - Consume imu.alerts -> DB + live dashboard",
+        "disabled": false,
+        "info": "A second, separate consumer (`alert-writer` group) reads topic imu.alerts. Each alert is written to imu_alerts AND pushed straight to the Live dashboard's alert table in the same step - the live feed is not a database poll, it is the stream itself reaching the screen. The History page's alert table is the same data read back out of TimescaleDB on a timer, the serving-layer view of the same events."
+    },
+    {
+        "id": "6310002",
+        "type": "serial-port",
+        "serialport": "/dev/tty.usbmodemXXXX",
+        "serialbaud": "115200",
+        "databits": 8,
+        "parity": "none",
+        "stopbits": "1",
+        "waitfor": "",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": "",
+        "responsetimeout": "10000"
+    },
+    {
+        "id": "6310007",
+        "type": "postgreSQLConfig",
+        "name": "TimescaleDB, Lab 6",
+        "host": "localhost",
+        "hostFieldType": "str",
+        "port": "5433",
+        "portFieldType": "num",
+        "database": "aiot",
+        "databaseFieldType": "str",
+        "ssl": "false",
+        "sslFieldType": "bool",
+        "applicationName": "",
+        "applicationNameType": "str",
+        "max": 10,
+        "maxFieldType": "num",
+        "idle": 1000,
+        "idleFieldType": "num",
+        "connectionTimeout": 10000,
+        "connectionTimeoutFieldType": "num",
+        "userFieldType": "env",
+        "user": "PGUSER",
+        "passwordFieldType": "env",
+        "password": "PGPASSWORD"
+    },
+    {
+        "id": "6320b01",
+        "type": "oriolrius-kafka-broker",
+        "name": "Redpanda (localhost:9092)",
+        "hosts": "localhost:9092",
+        "usesasl": false,
+        "saslmechanism": "plain",
+        "usetls": false,
+        "selfsign": false,
+        "useiot": false,
+        "iotType": "props"
+    },
+    {
+        "id": "6310010",
+        "type": "ui-theme",
+        "name": "Lab 6 default theme",
+        "colors": {
+            "surface": "#fcfcfd",
+            "primary": "#0d74ce",
+            "bgPage": "#f9f9fb",
+            "groupBg": "#ffffff",
+            "groupOutline": "#d9d9e0"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "631000f",
+        "type": "ui-base",
+        "name": "Lab 6 dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": true,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default"
+    },
+    {
+        "id": "6310011",
+        "type": "ui-page",
+        "name": "Dashboard",
+        "ui": "631000f",
+        "path": "/lab6",
+        "icon": "view-dashboard",
+        "layout": "grid",
+        "theme": "6310010",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": true,
+        "disabled": false
+    },
+    {
+        "id": "6310012",
+        "type": "ui-group",
+        "name": "Telemetry",
+        "page": "6310011",
+        "width": 12,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default"
+    },
+    {
+        "id": "6320g02",
+        "type": "ui-group",
+        "name": "Live alerts",
+        "page": "6310011",
+        "width": 12,
+        "height": 1,
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default"
+    },
+    {
+        "id": "6310003",
+        "type": "serial in",
+        "z": "tab6310001",
+        "name": "Nano 33 BLE serial",
+        "serial": "6310002",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "6310004"
+            ]
+        ]
+    },
+    {
+        "id": "6310004",
+        "type": "json",
+        "z": "tab6310001",
+        "name": "parse JSON line",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 340,
+        "y": 100,
+        "wires": [
+            [
+                "6310005"
+            ]
+        ]
+    },
+    {
+        "id": "6310006",
+        "type": "inject",
+        "z": "tab6310001",
+        "name": "test sample, no hardware needed",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"device\":\"nano-01\",\"t_ms\":12345,\"ax\":0.0123,\"ay\":-0.9821,\"az\":0.0456}",
+        "payloadType": "str",
+        "x": 170,
+        "y": 180,
+        "wires": [
+            [
+                "6310004"
+            ]
+        ]
+    },
+    {
+        "id": "6320i01",
+        "type": "inject",
+        "z": "tab6310001",
+        "name": "simulate major vibration, no hardware needed",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"device\":\"nano-01\",\"t_ms\":99999,\"ax\":2.51,\"ay\":-1.87,\"az\":3.06}",
+        "payloadType": "str",
+        "x": 200,
+        "y": 240,
+        "wires": [
+            [
+                "6310004"
+            ]
+        ]
+    },
+    {
+        "id": "6310005",
+        "type": "function",
+        "z": "tab6310001",
+        "name": "analyze vibration, shape for Redpanda",
+        "func": "// The Nano has no RTC, t_ms is milliseconds since its own boot, not a\n// wall-clock timestamp, so it cannot be written to the DB or used to key a\n// Kafka message as-is. Node-RED's own arrival time stands in instead.\n//\n// This is also where this lab's two streams are actually built. Every valid\n// sample becomes one message on output 1, published verbatim to Redpanda\n// topic imu.raw, whatever any consumer does with it. A second, independent\n// judgement runs alongside that: a short rolling window (~20 samples, ~170 ms\n// at the LSM9DS1's ~119 Hz) of the acceleration vector's magnitude,\n// |a| = sqrt(ax^2+ay^2+az^2). At rest |a| sits near 1 g (gravity) and barely\n// moves; a real knock or shake makes it swing hard within that window. When\n// the window's peak-to-peak swing crosses ALERT_THRESHOLD_G, output 2 fires\n// once - a per-device cooldown stops one shake from producing a burst of\n// alerts - publishing only to imu.alerts.\n//\n// This is section 6.9's windowed stream processing, running for real, and it\n// is also the reason imu.raw and imu.alerts are two separate Redpanda topics\n// rather than one stream with a severity field: two different consumers\n// (tabs 2 and 3) each want only one of these two judgements, at their own\n// pace, without the other's volume passing through them to get filtered out.\n\nconst ALERT_THRESHOLD_G = 0.5;   // peak-to-peak |a| swing over the window, in g\nconst WINDOW_SAMPLES     = 20;   // ~170 ms at ~119 Hz\nconst COOLDOWN_MS        = 2000; // minimum gap between two alerts for the same device\n\nconst p = msg.payload;\n\nif (p && p.device && typeof p.ax === 'number' && typeof p.ay === 'number' && typeof p.az === 'number') {\n    const ts = new Date().toISOString();\n    const mag = Math.sqrt(p.ax * p.ax + p.ay * p.ay + p.az * p.az);\n\n    const winKey = 'vibWindow_' + p.device;\n    const window = flow.get(winKey) || [];\n    window.push(mag);\n    if (window.length > WINDOW_SAMPLES) window.shift();\n    flow.set(winKey, window);\n\n    const peakToPeak = window.length > 1 ? Math.max(...window) - Math.min(...window) : 0;\n\n    const rawMsg = {\n        key: p.device,\n        payload: { ts, device: p.device, ax: p.ax, ay: p.ay, az: p.az, mag_g: Number(mag.toFixed(4)) }\n    };\n\n    let alertMsg = null;\n    const cooldownKey = 'lastAlertAt_' + p.device;\n    const lastAlertAt = flow.get(cooldownKey) || 0;\n    if (peakToPeak > ALERT_THRESHOLD_G && (Date.now() - lastAlertAt) > COOLDOWN_MS) {\n        flow.set(cooldownKey, Date.now());\n        alertMsg = {\n            key: p.device,\n            payload: {\n                ts, device: p.device,\n                peak_to_peak_g: Number(peakToPeak.toFixed(3)),\n                mag_g: Number(mag.toFixed(3)),\n                threshold_g: ALERT_THRESHOLD_G,\n                ax: p.ax, ay: p.ay, az: p.az\n            }\n        };\n    }\n\n    return [rawMsg, alertMsg, null];\n}\n\n// Boot banner ({\"status\":\"ready\",...}) or an IMU init error, not a sample.\nreturn [null, null, msg];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 140,
+        "wires": [
+            [
+                "6320p01"
+            ],
+            [
+                "6320p04"
+            ],
+            [
+                "6310009"
+            ]
+        ]
+    },
+    {
+        "id": "6310009",
+        "type": "debug",
+        "z": "tab6310001",
+        "name": "boot banner / non-sample line",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 660,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "6320p01",
+        "type": "oriolrius-kafka-producer",
+        "z": "tab6310001",
+        "name": "publish -> imu.raw",
+        "broker": "6320b01",
+        "topic": "imu.raw",
+        "requireAcks": 1,
+        "ackTimeoutMs": 5000,
+        "attributes": 0,
+        "useSchemaValidation": false,
+        "validateOnly": false,
+        "useiot": false,
+        "x": 660,
+        "y": 100,
+        "wires": [
+            [
+                "6320d01"
+            ]
+        ]
+    },
+    {
+        "id": "6320d01",
+        "type": "debug",
+        "z": "tab6310001",
+        "name": "produced -> imu.raw",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 880,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "6320d02",
+        "type": "debug",
+        "z": "tab6310001",
+        "name": "produced -> imu.alerts",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 890,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "631000b",
+        "type": "inject",
+        "z": "tab6310001",
+        "name": "every 1s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 340,
+        "wires": [
+            [
+                "631000d",
+                "6310020"
+            ]
+        ]
+    },
+    {
+        "id": "631000d",
+        "type": "postgresql",
+        "z": "tab6310001",
+        "name": "latest sample",
+        "query": "SELECT ts, device, ax, ay, az FROM imu_samples WHERE device = 'nano-01' ORDER BY ts DESC LIMIT 1;",
+        "postgreSQLConfig": "6310007",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 350,
+        "y": 340,
+        "wires": [
+            [
+                "631000e"
+            ]
+        ]
+    },
+    {
+        "id": "631000e",
+        "type": "function",
+        "z": "tab6310001",
+        "name": "fan out to chart series",
+        "func": "// One row -> three chart messages (msg.topic = series name), the\n// ui-chart node's default 'append, timestamp x-axis' behaviour handles\n// the rest, one line per axis, timestamped on arrival.\nif (!Array.isArray(msg.payload) || msg.payload.length === 0) {\n    return [null, { payload: 'no samples yet, is the board plugged in and the sketch running?' }];\n}\nconst row = msg.payload[0];\nconst out = ['ax', 'ay', 'az'].map((axis) => ({ topic: axis, payload: row[axis] }));\nconst status = `device ${row.device} \\u00b7 last row ${row.ts}`;\nreturn [out, { payload: status }];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 340,
+        "wires": [
+            [
+                "6310013"
+            ],
+            [
+                "6310016"
+            ]
+        ]
+    },
+    {
+        "id": "6310020",
+        "type": "postgresql",
+        "z": "tab6310001",
+        "name": "row count",
+        "query": "SELECT count(*)::int AS n FROM imu_samples;",
+        "postgreSQLConfig": "6310007",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 350,
+        "y": 400,
+        "wires": [
+            [
+                "6310021"
+            ]
+        ]
+    },
+    {
+        "id": "6310021",
+        "type": "function",
+        "z": "tab6310001",
+        "name": "row count -> text",
+        "func": "const n = (msg.payload && msg.payload[0] && msg.payload[0].n) || 0;\nmsg.payload = `${n} rows in imu_samples right now (24h TTL keeps this from growing forever)`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 400,
+        "wires": [
+            [
+                "6310022"
+            ]
+        ]
+    },
+    {
+        "id": "6310013",
+        "type": "ui-chart",
+        "z": "tab6310001",
+        "name": "ax / ay / az",
+        "group": "6310012",
+        "order": 1,
+        "width": 12,
+        "height": 6,
+        "label": "Acceleration (m/s\u00b2) - polled from imu_samples every 1s",
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": null,
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "m/s\u00b2",
+        "yAxisProperty": "payload",
+        "yAxisPropertyType": "msg",
+        "ymin": "-4",
+        "ymax": "4",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": 5,
+        "removeOlderUnit": "60",
+        "removeOlderPoints": "",
+        "colors": [
+            "#0095FF",
+            "#FF0000",
+            "#FF7F0E",
+            "#2CA02C",
+            "#A347E1",
+            "#D62728",
+            "#FF9896",
+            "#9467BD",
+            "#C5B0D5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "x": 790,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6310016",
+        "type": "ui-text",
+        "z": "tab6310001",
+        "group": "6310012",
+        "order": 2,
+        "width": 6,
+        "height": 1,
+        "name": "last sample status",
+        "label": "Last sample",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 800,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "6310022",
+        "type": "ui-text",
+        "z": "tab6310001",
+        "group": "6310012",
+        "order": 3,
+        "width": 6,
+        "height": 1,
+        "name": "row count status",
+        "label": "Table size",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 800,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "6320c01",
+        "type": "oriolrius-kafka-consumer",
+        "z": "tab6320002",
+        "name": "consume <- imu.raw",
+        "broker": "6320b01",
+        "topic": "imu.raw",
+        "groupid": "ts-writer",
+        "fromOffset": "latest",
+        "outOfRangeOffset": "latest",
+        "encoding": "utf8",
+        "useSchemaValidation": false,
+        "x": 180,
+        "y": 100,
+        "wires": [
+            [
+                "6320f01"
+            ]
+        ]
+    },
+    {
+        "id": "6320f01",
+        "type": "function",
+        "z": "tab6320002",
+        "name": "shape for insert",
+        "func": "// msg.payload is already the parsed JS object - the kafka-consumer node\n// JSON-decodes it for us. Build the parameterized INSERT's positional\n// args from it. This function, not the producer on tab 1, is what\n// actually writes to TimescaleDB now: the two are decoupled by\n// Redpanda, this consumer can stop, fall behind, or be redeployed\n// without the board or the producer even noticing.\nconst p = msg.payload;\nif (!p || !p.device) return null;\nmsg.params = [p.ts, p.device, p.ax, p.ay, p.az, p.mag_g];\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 100,
+        "wires": [
+            [
+                "6310008"
+            ]
+        ]
+    },
+    {
+        "id": "6310008",
+        "type": "postgresql",
+        "z": "tab6320002",
+        "name": "insert sample",
+        "query": "INSERT INTO imu_samples (ts, device, ax, ay, az, mag_g) VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (device, ts) DO NOTHING;",
+        "postgreSQLConfig": "6310007",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 630,
+        "y": 100,
+        "wires": [
+            [
+                "6310019"
+            ]
+        ]
+    },
+    {
+        "id": "6310019",
+        "type": "debug",
+        "z": "tab6320002",
+        "name": "insert result",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "pgsql",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 840,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "6320c02",
+        "type": "oriolrius-kafka-consumer",
+        "z": "tab6320003",
+        "name": "consume <- imu.alerts",
+        "broker": "6320b01",
+        "topic": "imu.alerts",
+        "groupid": "alert-writer",
+        "fromOffset": "latest",
+        "outOfRangeOffset": "latest",
+        "encoding": "utf8",
+        "useSchemaValidation": false,
+        "x": 190,
+        "y": 100,
+        "wires": [
+            [
+                "6320f02"
+            ]
+        ]
+    },
+    {
+        "id": "6320f02",
+        "type": "function",
+        "z": "tab6320003",
+        "name": "shape alert for insert + live feed",
+        "func": "const p = msg.payload;\nif (!p || !p.device) return [null, null];\n\nconst dbMsg = { params: [p.ts, p.device, p.peak_to_peak_g, p.mag_g, p.threshold_g, p.ax, p.ay, p.az] };\n\n// One row straight onto the Live dashboard's alert table - action\n// 'append' on that ui-table widget adds it without a database round\n// trip. This is the speed-layer half of a Lambda-style split: the\n// same event reaches the screen twice, once here direct from the log,\n// and again later when the History page polls imu_alerts on a timer.\nconst feedMsg = {\n    payload: {\n        ts: p.ts,\n        device: p.device,\n        peak_to_peak_g: p.peak_to_peak_g,\n        mag_g: p.mag_g,\n        threshold_g: p.threshold_g\n    }\n};\n\nreturn [dbMsg, feedMsg];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 460,
+        "y": 100,
+        "wires": [
+            [
+                "6320a01"
+            ],
+            [
+                "6320a02"
+            ]
+        ]
+    },
+    {
+        "id": "6320a01",
+        "type": "postgresql",
+        "z": "tab6320003",
+        "name": "insert alert",
+        "query": "INSERT INTO imu_alerts (ts, device, peak_to_peak_g, mag_g, threshold_g, ax, ay, az) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) ON CONFLICT (device, ts) DO NOTHING;",
+        "postgreSQLConfig": "6310007",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 700,
+        "y": 80,
+        "wires": [
+            [
+                "6320a03"
+            ]
+        ]
+    },
+    {
+        "id": "6320a03",
+        "type": "debug",
+        "z": "tab6320003",
+        "name": "alert insert result",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "pgsql",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "6320a02",
+        "type": "ui-table",
+        "z": "tab6320003",
+        "group": "6320g02",
+        "name": "live alerts feed",
+        "label": "Live alerts, from topic imu.alerts",
+        "order": 1,
+        "width": 12,
+        "height": 6,
+        "maxrows": 20,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": false,
+        "deselect": true,
+        "selectionType": "none",
+        "columns": null,
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "append",
+        "className": "",
+        "x": 700,
+        "y": 130,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6320i02",
+        "type": "inject",
+        "z": "tab6320003",
+        "name": "every 5s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 2,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 170,
+        "y": 280,
+        "wires": [
+            [
+                "6320q01",
+                "6320q03"
+            ]
+        ]
+    },
+    {
+        "id": "6320q01",
+        "type": "postgresql",
+        "z": "tab6320003",
+        "name": "recent alerts",
+        "query": "SELECT ts, device, peak_to_peak_g, mag_g, threshold_g FROM imu_alerts ORDER BY ts DESC LIMIT 20;",
+        "postgreSQLConfig": "6310007",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 400,
+        "y": 260,
+        "wires": [
+            [
+                "6320q02"
+            ]
+        ]
+    },
+    {
+        "id": "6320q02",
+        "type": "function",
+        "z": "tab6320003",
+        "name": "rows -> table payload",
+        "func": "msg.payload = Array.isArray(msg.payload) ? msg.payload : [];\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 260,
+        "wires": [
+            [
+                "6320tb1"
+            ]
+        ]
+    },
+    {
+        "id": "6320q03",
+        "type": "postgresql",
+        "z": "tab6320003",
+        "name": "alert count",
+        "query": "SELECT count(*)::int AS n, max(ts) AS last_ts FROM imu_alerts;",
+        "postgreSQLConfig": "6310007",
+        "split": false,
+        "rowsPerMsg": 1,
+        "outputs": 1,
+        "x": 430,
+        "y": 320,
+        "wires": [
+            [
+                "6320q04"
+            ]
+        ]
+    },
+    {
+        "id": "6320q04",
+        "type": "function",
+        "z": "tab6320003",
+        "name": "alert count + last timestamp -> text",
+        "func": "const row = (msg.payload && msg.payload[0]) || {};\nconst n = row.n || 0;\nconst last = row.last_ts ? new Date(row.last_ts).toISOString() : 'none';\nmsg.payload = `${n} alerts recorded in imu_alerts. Last alert: ${last}`;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 660,
+        "y": 320,
+        "wires": [
+            [
+                "6320tx1"
+            ]
+        ]
+    },
+    {
+        "id": "6320tb1",
+        "type": "ui-table",
+        "z": "tab6320003",
+        "group": "6320g06",
+        "name": "alerts from TimescaleDB",
+        "label": "Stored alerts, from table imu_alerts, refreshed every 5 seconds",
+        "order": 1,
+        "width": 12,
+        "height": 6,
+        "maxrows": 20,
+        "passthru": false,
+        "autocols": true,
+        "showSearch": true,
+        "deselect": true,
+        "selectionType": "none",
+        "columns": null,
+        "mobileBreakpoint": "sm",
+        "mobileBreakpointType": "defaults",
+        "action": "replace",
+        "className": "",
+        "x": 870,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6320tx1",
+        "type": "ui-text",
+        "z": "tab6320003",
+        "group": "6320g06",
+        "order": 2,
+        "width": 12,
+        "height": 1,
+        "name": "alert count status",
+        "label": "Alert count",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 870,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "6320g06",
+        "type": "ui-group",
+        "name": "Stored alerts",
+        "page": "6310011",
+        "width": 12,
+        "height": 1,
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false,
+        "groupType": "default"
+    },
+    {
+        "id": "6320p04",
+        "type": "oriolrius-kafka-producer",
+        "z": "tab6310001",
+        "name": "publish -> imu.alerts",
+        "broker": "6320b01",
+        "topic": "imu.alerts",
+        "requireAcks": 1,
+        "ackTimeoutMs": 5000,
+        "attributes": 0,
+        "useSchemaValidation": false,
+        "validateOnly": false,
+        "useiot": false,
+        "x": 670,
+        "y": 160,
+        "wires": [
+            [
+                "6320d02"
+            ]
+        ]
+    }
+]
