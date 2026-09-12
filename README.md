@@ -44,23 +44,23 @@ Seven step-by-step tutorials, each covering Windows, macOS, and Linux. Do the on
 Each row links to that lab's own `README.md`, the full self-contained procedure with every command, every expected output, and its own troubleshooting table.
 
 | Lab | Chapter | What you build | Folder |
-| :---- | :---- | :---- | :---- |
-| 1 | Chapter 1: IoT Platforms | Simulated devices publish MQTT telemetry, Node-RED processes it into Redis, and a Streamlit dashboard reads it back live. | [ch01-mosquitto-nodered/](./ch01-mosquitto-nodered/README.md) |
-| 2 | Chapter 2: Hardware and Firmware | Flash the same workload to a real ESP32-S3 three ways, a polling super-loop, correct FreeRTOS priorities, broken ones, and measure worst-case latency. | [ch02-rtos-latency/](./ch02-rtos-latency/README.md) |
-| 3 | Chapter 3: Connectivity | Measure the real network cost of a telemetry message under MQTT and HTTP, with and without TLS, from packet captures. | [ch03-mqtt-vs-http-cost/](./ch03-mqtt-vs-http-cost/README.md) |
-| 4 | Chapter 4: Securing IoT and Edge AI Systems | Build a two-level PKI from scratch, issue per-device certificates, and break mutual TLS and per-device authorization on purpose. | [ch04-pki-security/](./ch04-pki-security/README.md) |
-| 5 | Chapter 5: Edge Computing and Digital Twins | Close the loop between a platform's desired state and a device's reported state through a Device Twin. | [ch05-edge-device-twin/](./ch05-edge-device-twin/README.md) |
-| 6 | Chapter 6: Data Intensive AIoT Platforms | Stream a real Nano 33 BLE Sense over USB serial through Node-RED into TimescaleDB, with a live dashboard. | [ch06-imu-streaming/](./ch06-imu-streaming/README.md) |
-| 7 | Chapter 7: EDA and Dataset Preparation | EDA on raw environmental telemetry, then a stratified train/val/test split. | | to do |
-| 8 | Chapter 8: Signal Processing and Feature Engineering | Turn raw motor vibration into FFT and Butterworth spectral features a model can score. | to do |
-| 9 | Chapter 9: Supervised Learning | Train a yes/no/idle gesture classifier on the Nano 33 BLE Sense, exported as a 7 KB int8 `.tflite`.| to do |
-| 10 | Chapter 10: Anomaly Detection | Catch a bearing fault on vibration features at a sub-5% false-alarm rate. | to do |
-| 11 | Chapter 11: Model Deployment | Deploy the Chapter 9 gesture model to ESP32-S3 and Nano 33, measuring accuracy delta and p99 latency. | to do |
-| 12 | Chapter 12: TinyML Frameworks | Benchmark the same model across three runtimes, TFLite Micro, ESP-NN, CMSIS-NN, and two boards. | to do |
-| 13 | Chapter 13: Model Compression | Shrink the gesture model with quantization and pruning, then distil a 4 KB student that beats it. | to do |
-| 14 | Chapter 14: Embedded Vision | Measure camera capture and inference, deploy a compact classifier or detector, publish over BLE. | to do |
-| 15 | Chapter 15: Tiny Transformers | A wake word detected entirely on a Nano 33 BLE Sense triggers a local LLM to generate a question, over serial, through Node-RED. | to do |
-| 16 | Chapter 16: Industrial AIoT and MLOps (capstone) | Three PLC-bridged production lines, anomaly scorers hot-swapped by signed OTA, drift-triggered retraining. | to do |
+| :--- | :--- | :--- | :--- |
+| 1 | Chapter 1: IoT Platforms | Simulate IoT devices publishing MQTT telemetry, process the stream with Node-RED, store the latest state in Redis, and visualize it live with Streamlit. | [ch01-mosquitto-nodered/](./ch01-mosquitto-nodered/README.md) |
+| 2 | Chapter 2: Hardware and Firmware | Run the same workload on a real ESP32-S3 using a polling super-loop and FreeRTOS, then measure how task priorities affect worst-case latency. | [ch02-rtos-latency/](./ch02-rtos-latency/README.md) |
+| 3 | Chapter 3: Connectivity | Measure the real network cost of the same telemetry message over MQTT and HTTP, with and without TLS, using packet captures. | [ch03-mqtt-vs-http-cost/](./ch03-mqtt-vs-http-cost/README.md) |
+| 4 | Chapter 4: IoT Security | Build a two-level PKI from scratch, issue a certificate to each device, establish mutual TLS, and test what happens when identity or authorization rules are broken. | [ch04-pki-security/](./ch04-pki-security/README.md) |
+| 5 | Chapter 5: Edge Computing & Digital Twins | Build a Device Twin and close the loop between the platform's desired state and the device's reported state. | [ch05-edge-device-twin/](./ch05-edge-device-twin/README.md) |
+| 6 | Chapter 6: AIoT Data-Intensive Systems | Stream real IMU measurements from an Arduino Nano 33 BLE Sense through USB and Node-RED into an event pipeline and TimescaleDB, then observe the data live. | [ch06-imu-streaming/](./ch06-imu-streaming/README.md) |
+| 7 | Chapter 7: EDA and Dataset Preparation | Explore raw sensor data, detect missing values, outliers, imbalance, drift, and inconsistent samples, then produce a clean and reproducible dataset for the next chapters. | `to do` |
+| 8 | Chapter 8: Signal Processing and Feature Engineering | Start from raw motor vibration, inspect the signal in time and frequency domains, apply filtering and FFT analysis, then extract meaningful features from signal windows. | `to do` |
+| 9 | Chapter 9: TinyML: Frameworks, Runtimes, and the Evidence That Matters | Deploy the same small neural network through different TinyML runtimes and compare memory usage, latency, model size, and numerical output on embedded hardware. | `to do` |
+| 10 | Chapter 10: Supervised Learning: Classification & Regression | Build a gesture dataset from the Nano 33 BLE Sense, train a yes, no, and idle classifier, evaluate it, and export the resulting model for embedded inference. | `to do` |
+| 11 | Chapter 11: Unsupervised Learning: Anomaly Detection & Clustering | Learn normal vibration behaviour from unlabeled data, detect abnormal bearing conditions, and evaluate the trade-off between detection rate and false alarms. | `to do` |
+| 12 | Chapter 12: Model Compression: Quantization, Pruning, and Distillation | Compress an embedded ML model with quantization, pruning, and knowledge distillation, then compare model size, memory use, latency, and accuracy. | `to do` |
+| 13 | Chapter 13: Model Deployment: From Correct Model to Trusted Device | Deploy a validated model to ESP32-S3 and Nano 33 BLE Sense, integrate preprocessing and inference into firmware, then measure end-to-end latency, memory use, and output consistency. | `to do` |
+| 14 | Chapter 14: Embedded Computer Vision | Capture images on an embedded platform, prepare the inference pipeline, deploy a compact vision model, and measure capture, preprocessing, and inference latency. | `to do` |
+| 15 | Chapter 15: Keyword Spotting, SLMs and Agentic AI | Detect a wake word locally on an embedded device, trigger a local Small Language Model, and connect the result to an agentic workflow through an edge gateway. | `to do` |
+| 16 | Chapter 16: Industrial AIoT & MLOps for the Edge | Build an industrial AIoT pipeline connecting simulated or real production assets to edge inference, model monitoring, signed OTA deployment, and an MLOps feedback loop. | `to do` |
 
 ## Conventions
 
