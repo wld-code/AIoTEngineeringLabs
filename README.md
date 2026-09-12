@@ -50,7 +50,7 @@ Each row links to that lab's own `README.md`, the full self-contained procedure 
 | 3 | Chapter 3: Connectivity | Measure the real network cost of a telemetry message under MQTT and HTTP, with and without TLS, from packet captures. | [ch03-mqtt-vs-http-cost/](./ch03-mqtt-vs-http-cost/README.md) |
 | 4 | Chapter 4: Securing IoT and Edge AI Systems | Build a two-level PKI from scratch, issue per-device certificates, and break mutual TLS and per-device authorization on purpose. | [ch04-pki-security/](./ch04-pki-security/README.md) |
 | 5 | Chapter 5: Edge Computing and Digital Twins | Close the loop between a platform's desired state and a device's reported state through a Device Twin. | [ch05-edge-device-twin/](./ch05-edge-device-twin/README.md) |
-| 6 | Chapter 6: Data Intensive AIoT Platforms | Stream a real Nano 33 BLE Sense over USB serial through Node-RED into TimescaleDB, with a live dashboard. | to do |
+| 6 | Chapter 6: Data Intensive AIoT Platforms | Stream a real Nano 33 BLE Sense over USB serial through Node-RED into TimescaleDB, with a live dashboard. | [ch06-imu-streaming/](./ch06-imu-streaming/README.md) |
 | 7 | Chapter 7: EDA and Dataset Preparation | EDA on raw environmental telemetry, then a stratified train/val/test split. | | to do |
 | 8 | Chapter 8: Signal Processing and Feature Engineering | Turn raw motor vibration into FFT and Butterworth spectral features a model can score. | to do |
 | 9 | Chapter 9: Supervised Learning | Train a yes/no/idle gesture classifier on the Nano 33 BLE Sense, exported as a 7 KB int8 `.tflite`.| to do |
