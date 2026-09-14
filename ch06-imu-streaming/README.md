@@ -6,7 +6,7 @@
 
 ![Arduino Nano 33 BLE Sense streams USB serial JSON lines into Node-RED, which decodes and analyzes vibration, then splits the stream into a Redpanda imu.raw topic on every valid measurement and a Redpanda imu.alerts topic when the threshold is crossed. A measurement consumer inserts imu.raw into TimescaleDB's imu_samples table, read periodically by the Telemetry dashboard. An alert consumer inserts imu.alerts into TimescaleDB's imu_alerts table, read periodically by the Stored alerts dashboard, while the alert consumer also feeds the Live alerts dashboard directly](../figures/ch06-lab-architecture.png)
 
-Node-RED runs the vibration analysis before a message reaches Redpanda, so the two topics carry different data: `imu.raw` holds every measurement, `imu.alerts` holds only the ones that crossed the threshold. See [Lab 6: Streaming Technologies](../tutorials/lab06-streaming-technologies.md) for what each technology does and why this lab uses it.
+Node-RED runs the vibration analysis before a message reaches Redpanda, so the two topics carry different data: `imu.raw` holds every measurement, `imu.alerts` holds only the ones that crossed the threshold. See [Data Processing Technologies](../tutorials/data-processing-technologies.md) for a technical introduction to Redpanda and TimescaleDB, the two technologies behind this lab's pipeline.
 
 ## Requirements
 

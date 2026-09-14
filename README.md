@@ -12,6 +12,7 @@ This is the companion lab repository for *AIoT Engineering* by Walid Abdaoui, pu
 
 - [Before you start: prerequisites](#before-you-start-prerequisites)
 - [Startup tutorials](#startup-tutorials)
+- [Technology deep-dives](#technology-deep-dives)
 - [Labs 1 to 16](#labs-1-to-16)
 - [Conventions](#conventions)
 - [Something is wrong](#something-is-wrong)
@@ -38,6 +39,14 @@ Seven step-by-step tutorials, each covering Windows, macOS, and Linux. Do the on
 | T5 | [Arduino Nano 33 BLE startup](./tutorials/arduino-nano33ble-startup.md) | Arduino IDE 2.x, the Mbed OS Nano board package, first upload, verifying the onboard IMU. |
 | T6 | [Node-RED startup](./tutorials/nodered-startup.md) | Flows, nodes and Deploy explained, running Node-RED in Docker versus natively on the host, the Node-RED Dashboard, and a real config-node bug worth knowing about. |
 | T7 | [Jetson Nano startup](./tutorials/jetson-nano-startup.md) | Flashing the SD card image, first boot with a monitor, SSH in, verifying the GPU with `tegrastats`/`jtop`, Docker with GPU passthrough. |
+
+## Technology deep-dives
+
+Not a per-OS startup guide, but a technical explainer for a technology used across the labs: how it works internally, its schemas, and the commands to operate it.
+
+| Tutorial | Covers |
+| :---- | :---- |
+| [Data Processing Technologies](./tutorials/data-processing-technologies.md) | Redpanda: the Kafka wire protocol, partitions and Raft-based replication, the produce/fetch path, record schemas, and the `rpk` command reference. TimescaleDB: hypertables, chunks, retention, compression, and continuous aggregates. Used in Lab 6. |
 
 ## Labs 1 to 16
 
