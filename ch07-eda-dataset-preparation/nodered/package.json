@@ -1,0 +1,10 @@
+{
+  "name": "lab7-nodered",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lab 7 - Node-RED, serial capture from the Nano 33 BLE Sense's onboard microphone, one CSV file per recording.",
+  "dependencies": {
+    "node-red": "5.0.4",
+    "node-red-node-serialport": "2.0.3"
+  }
+}

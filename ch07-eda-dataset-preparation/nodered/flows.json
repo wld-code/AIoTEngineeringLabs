@@ -1,0 +1,284 @@
+[
+    {
+        "id": "tab7310001",
+        "type": "tab",
+        "label": "1 - Capture audio to CSV",
+        "disabled": false,
+        "info": "Arduino Nano 33 BLE Sense (USB serial) -> Node-RED -> one CSV file per recording, under data/<category>/.\n\nClick one of the four 'Record: ...' inject nodes to trigger one recording. Each click sends a single 'R' byte to the board, waits for the REC_START ... REC_END block it streams back, and writes it as data/<category>/<category>_NN.csv, NN counting up from 01 for that category.\n\nEdit the serial-port config node's port to match `ls /dev/tty.*` (macOS/Linux) or your COM port (Windows) before deploying."
+    },
+    {
+        "id": "7310002",
+        "type": "serial-port",
+        "serialport": "/dev/tty.usbmodemXXXX",
+        "serialbaud": "115200",
+        "databits": 8,
+        "parity": "none",
+        "stopbits": "1",
+        "waitfor": "",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": "",
+        "responsetimeout": "10000"
+    },
+    {
+        "id": "7310i01",
+        "type": "inject",
+        "z": "tab7310001",
+        "name": "Record: elektor",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "category",
+        "payload": "elektor",
+        "payloadType": "str",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "7310f01"
+            ]
+        ]
+    },
+    {
+        "id": "7310i02",
+        "type": "inject",
+        "z": "tab7310001",
+        "name": "Record: electronics",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "category",
+        "payload": "electronics",
+        "payloadType": "str",
+        "x": 150,
+        "y": 160,
+        "wires": [
+            [
+                "7310f01"
+            ]
+        ]
+    },
+    {
+        "id": "7310i03",
+        "type": "inject",
+        "z": "tab7310001",
+        "name": "Record: machines",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "category",
+        "payload": "machines",
+        "payloadType": "str",
+        "x": 150,
+        "y": 220,
+        "wires": [
+            [
+                "7310f01"
+            ]
+        ]
+    },
+    {
+        "id": "7310i04",
+        "type": "inject",
+        "z": "tab7310001",
+        "name": "Record: iot",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "category",
+        "payload": "iot",
+        "payloadType": "str",
+        "x": 150,
+        "y": 280,
+        "wires": [
+            [
+                "7310f01"
+            ]
+        ]
+    },
+    {
+        "id": "7310f01",
+        "type": "function",
+        "z": "tab7310001",
+        "name": "start recording",
+        "func": "// One category name in, on every click of a \"Record: <category>\" node.\n// Keeps its own per-category counter in flow context, so recordings number\n// 01, 02, 03... independently per category, picking up where a previous\n// session left off (flow context here is only in-memory, so a Node-RED\n// restart resets the counters back to whatever files already exist on\n// disk not being auto-detected - see the README for how to resume past a\n// restart without overwriting existing recordings).\nconst category = msg.payload;\nconst countKey = 'count_' + category;\nconst index = (flow.get(countKey) || 0) + 1;\nflow.set(countKey, index);\nflow.set('current', { category, index });\n\nconst trigger = { payload: 'R' };\nconst status = { payload: `recording ${category} #${String(index).padStart(2, '0')}...` };\nreturn [trigger, status];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 160,
+        "wires": [
+            [
+                "7310s02"
+            ],
+            [
+                "7310d01"
+            ]
+        ]
+    },
+    {
+        "id": "7310s02",
+        "type": "serial out",
+        "z": "tab7310001",
+        "name": "trigger -> board",
+        "serial": "7310002",
+        "x": 640,
+        "y": 130,
+        "wires": []
+    },
+    {
+        "id": "7310d01",
+        "type": "debug",
+        "z": "tab7310001",
+        "name": "recording status",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 640,
+        "y": 190,
+        "wires": []
+    },
+    {
+        "id": "7310s01",
+        "type": "serial in",
+        "z": "tab7310001",
+        "name": "board -> samples",
+        "serial": "7310002",
+        "x": 150,
+        "y": 340,
+        "wires": [
+            [
+                "7310f02"
+            ]
+        ]
+    },
+    {
+        "id": "7310f02",
+        "type": "function",
+        "z": "tab7310001",
+        "name": "accumulate samples, build CSV on REC_END",
+        "func": "// The board streams one line per sample between two marker lines,\n// REC_START and REC_END - see nano33-audio-capture.ino. This function\n// buffers samples in flow context between those markers, and on REC_END\n// builds the CSV text for the recording named in flow.current (set by the\n// \"start recording\" function when this recording was triggered).\nconst text = String(msg.payload || '').trim();\nif (text === '') return [null, null];\n\nif (text === 'REC_START') {\n    flow.set('buf', []);\n    return [null, null];\n}\n\nif (text === 'REC_END') {\n    const buf = flow.get('buf') || [];\n    const current = flow.get('current');\n    flow.set('buf', null);\n    flow.set('current', null);\n\n    if (!current) {\n        node.warn(`REC_END with no pending recording, dropped ${buf.length} samples`);\n        return [null, null];\n    }\n\n    let csv = 'sample_index,amplitude\\n';\n    for (let i = 0; i < buf.length; i++) {\n        csv += i + ',' + buf[i] + '\\n';\n    }\n\n    const index = String(current.index).padStart(2, '0');\n    const filename = `../data/${current.category}/${current.category}_${index}.csv`;\n    return [{ payload: csv, filename, samples: buf.length }, null];\n}\n\nconst buf = flow.get('buf');\nif (buf) {\n    const n = Number(text);\n    if (!Number.isNaN(n)) buf.push(n);\n    return [null, null];\n}\n\n// Not between REC_START/REC_END and not one of the two markers - the\n// board's own boot banner ({\"status\":\"ready\",...}) or an init error.\nreturn [null, msg];",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 340,
+        "wires": [
+            [
+                "7310file"
+            ],
+            [
+                "7310d02"
+            ]
+        ]
+    },
+    {
+        "id": "7310file",
+        "type": "file",
+        "z": "tab7310001",
+        "name": "write CSV",
+        "filename": "filename",
+        "filenameType": "msg",
+        "appendNewline": false,
+        "createDir": true,
+        "overwriteFile": "true",
+        "encoding": "none",
+        "x": 700,
+        "y": 320,
+        "wires": [
+            [
+                "7310d03"
+            ]
+        ]
+    },
+    {
+        "id": "7310d02",
+        "type": "debug",
+        "z": "tab7310001",
+        "name": "boot banner / non-sample line",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 700,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "7310d03",
+        "type": "debug",
+        "z": "tab7310001",
+        "name": "CSV written",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": true,
+        "complete": "payload.samples",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 900,
+        "y": 320,
+        "wires": []
+    }
+]
