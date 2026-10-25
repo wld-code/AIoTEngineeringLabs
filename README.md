@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-**16 hands-on labs, one per chapter, for building AI-powered IoT systems from the sensor up to the cloud.**
+**13 hands-on labs, one per chapter, for building AI-powered IoT systems from the sensor up to the cloud.**
 
 This is the companion lab repository for *AIoT Engineering* by Walid Abdaoui, published by Elektor. Each lab is full runnable code: Docker stacks, real firmware for real boards, and a step-by-step procedure with expected output at every stage. Read this page before starting any lab.
 
@@ -13,7 +13,7 @@ This is the companion lab repository for *AIoT Engineering* by Walid Abdaoui, pu
 - [Before you start: prerequisites](#before-you-start-prerequisites)
 - [Startup tutorials](#startup-tutorials)
 - [Technology deep-dives](#technology-deep-dives)
-- [Labs 1 to 16](#labs-1-to-16)
+- [Labs 1 to 13](#labs-1-to-13)
 - [Conventions](#conventions)
 - [Something is wrong](#something-is-wrong)
 - [License](#license)
@@ -48,7 +48,7 @@ Not a per-OS startup guide, but a technical explainer for a technology used acro
 | :---- | :---- |
 | [Data Processing Technologies](./tutorials/data-processing-technologies.md) | Redpanda: the Kafka wire protocol, partitions and Raft-based replication, the produce/fetch path, record schemas, and the `rpk` command reference. TimescaleDB: hypertables, chunks, retention, compression, and continuous aggregates. Used in Lab 6. |
 
-## Labs 1 to 16
+## Labs 1 to 13
 
 Each row links to that lab's own `README.md`, the full self-contained procedure with every command, every expected output, and its own troubleshooting table.
 
@@ -61,15 +61,12 @@ Each row links to that lab's own `README.md`, the full self-contained procedure 
 | 5 | Chapter 5: Edge Computing & Digital Twins | Build a Device Twin and close the loop between the platform's desired state and the device's reported state. | [ch05-edge-device-twin/](./ch05-edge-device-twin/README.md) |
 | 6 | Chapter 6: AIoT Data-Intensive Systems | Stream real IMU measurements from an Arduino Nano 33 BLE Sense through USB and Node-RED into an event pipeline and TimescaleDB, then observe the data live. | [ch06-imu-streaming/](./ch06-imu-streaming/README.md) |
 | 7 | Chapter 7: EDA and Dataset Preparation | Explore raw sensor data, detect missing values, outliers, imbalance, drift, and inconsistent samples, then produce a clean and reproducible dataset for the next chapters. | [ch07-eda-dataset-preparation/](./ch07-eda-dataset-preparation/README.md) |
-| 8 | Chapter 8: Signal Processing and Feature Engineering | Start from raw motor vibration, inspect the signal in time and frequency domains, apply filtering and FFT analysis, then extract meaningful features from signal windows. | `to do` |
-| 9 | Chapter 9: TinyML: Frameworks, Runtimes, and the Evidence That Matters | Deploy the same small neural network through different TinyML runtimes and compare memory usage, latency, model size, and numerical output on embedded hardware. | `to do` |
-| 10 | Chapter 10: Supervised Learning: Classification & Regression | Build a gesture dataset from the Nano 33 BLE Sense, train a yes, no, and idle classifier, evaluate it, and export the resulting model for embedded inference. | `to do` |
-| 11 | Chapter 11: Unsupervised Learning: Anomaly Detection & Clustering | Learn normal vibration behaviour from unlabeled data, detect abnormal bearing conditions, and evaluate the trade-off between detection rate and false alarms. | `to do` |
-| 12 | Chapter 12: Model Compression: Quantization, Pruning, and Distillation | Compress an embedded ML model with quantization, pruning, and knowledge distillation, then compare model size, memory use, latency, and accuracy. | `to do` |
-| 13 | Chapter 13: Model Deployment: From Correct Model to Trusted Device | Deploy a validated model to ESP32-S3 and Nano 33 BLE Sense, integrate preprocessing and inference into firmware, then measure end-to-end latency, memory use, and output consistency. | `to do` |
-| 14 | Chapter 14: Embedded Computer Vision | Capture images on an embedded platform, prepare the inference pipeline, deploy a compact vision model, and measure capture, preprocessing, and inference latency. | `to do` |
-| 15 | Chapter 15: Keyword Spotting, SLMs and Agentic AI | Detect a wake word locally on an embedded device, trigger a local Small Language Model, and connect the result to an agentic workflow through an edge gateway. | `to do` |
-| 16 | Chapter 16: Industrial AIoT & MLOps for the Edge | Build an industrial AIoT pipeline connecting simulated or real production assets to edge inference, model monitoring, signed OTA deployment, and an MLOps feedback loop. | `to do` |
+| 8 | Chapter 8: Signal Processing and Feature Extraction | Record motion (still, tilt, shake) and spoken-word audio ("start", "stop") on a Nano 33 BLE Sense, then compare their waveforms, spectra, and features across repeated trials. | `to do` |
+| 9 | Chapter 9: Machine Learning Fundamentals | Build transparent regression and classification models with exported parameters, reproduce inference in C, and test numerical parity. Specification only. | `to do` |
+| 10 | Chapter 10: Building and Evaluating TinyML Models | Compare a conventional classifier with a small neural network on leakage-free sensor splits, extended with Isolation Forest. Specification only. | `to do` |
+| 11 | Chapter 11: TinyML Runtimes and Model Optimization | Inspect graphs and tensors, create float and int8 model artifacts, and define a controlled LiteRT Micro benchmark on ESP32-S3. Specification only. | `to do` |
+| 12 | Chapter 12: Embedded Inference and Deployment | Deploy the exact Lab 11 artifact to ESP32-S3, verify deterministic replay parity, and then exercise real acquisition. Specification only. | `to do` |
+| 13 | Chapter 13: Edge MLOps | Build versioned model packages, reject an invalid update, and demonstrate recovery and rollback. Specification only. | `to do` |
 
 ## Conventions
 
